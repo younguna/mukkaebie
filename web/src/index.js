@@ -1,6 +1,8 @@
 import {StoreList} from "./js/StoreList.js";
 import {Login} from "./js/Login.js";
 import StoreUtil from "./js/Util.js";
+import style from "./scss/main.scss";
+
 
 document.addEventListener("DOMContentLoaded", function () {
 
