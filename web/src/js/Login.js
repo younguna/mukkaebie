@@ -1,25 +1,35 @@
 
-import StoreUtil from './Util.js'
+import StoreUtil from './Util.js';
 
 
+export default class Login {
 
-export class Login {
   constructor(){
-    this.init()
+    this.getDomObjects();
+    this.init();
   }
 
-  init(){
-    document.querySelector("#topLoggedinInfo").addEventListener("click", function () {
-      document.querySelector("#loginModal").style.display = "block";
+  async init(){
+    this.topLoginInfoEl.addEventListener("click", function () {
+      this.loginModalEl.style.display = "block";
       setTimeout(function () {
-        document.querySelector("#loginModal").style.opacity = "1";
-      }, 100)
+        this.loginModalEl.style.opacity = "1";
+      }, 100);
     });
-    this.getInputInfo()
-        .then(this.sendLoginInfo)
-        .then(this.checkValidity)
-        .then(this.succeedLogin)
-        .catch(this.failLogin)
+    const inputInfo = await this.getInputInfo();
+    const password = this.sendLoginInfo(inputInfo);
+    const userId = await this.checkValidity(password);
+    await this.succeedLogin(userId).catch(this.failLogin);
+  }
+
+  getDomObjects(){
+    this.topLoginInfoEl = document.querySelector("#topLoggedinInfo");
+    this.loginModalEl = document.querySelector("#loginModal");
+    this.loginBtnEl = document.querySelector(".loginButton");
+    this.loginIdInputEl = document.querySelector(".loginIDInput");
+    this.loginPwInputEl = document.querySelector(".loginPWInput");
+    this.reviewUserEl = document.querySelector(".review-user");
+    this.loginMsgEl = document.querySelector("#loginMsg");
   }
 
   sendLoginInfo(userId){
@@ -32,44 +42,42 @@ export class Login {
       };
       xhttp.open("GET", SERVER_BASE_URL + "/users/cf/" + userId["userId"]);
       xhttp.send();
-    })
+    });
   }
-
 
   getInputInfo(){
     return new Promise(function (resolve) {
-      document.querySelector(".loginButton").addEventListener("click", function () {
-        const idInfo = document.querySelector(".loginIDInput").value;
+      this.loginBtnEl.addEventListener("click", function () {
+        const idInfo = this.loginIdInputEl.value;
         const packet = {"userId" : idInfo};
         resolve(packet);
-      })
+      });
     });
   }
 
   checkValidity(pwd){
     return new Promise(function (resolve, reject) {
-      const pwInfo = document.querySelector(".loginPWInput").value;
+      const pwInfo = this.loginPwInputEl.value;
       if (pwd["_id"] === pwInfo){
-        resolve(pwd["userId"])
+        resolve(pwd["userId"]);
       }
       else {
         reject('아이디나 비밀번호를 확인해 주세요');
       }
-    })
+    });
   }
 
   succeedLogin(userId){
     StoreUtil.makeAfterLoginModal();
-    document.querySelector("#loginModal").style.display = "none";
-    const topLoggedinInfo = document.querySelector("#topLoggedinInfo");
-    topLoggedinInfo.innerText = userId;
+    this.loginModalEl.style.display = "none";
+    this.topLoginInfoEl.innerText = userId;
     session = userId;
-    document.querySelector(".review-user").innerText = session;
+    this.reviewUserEl.innerText = session;
   }
 
   failLogin(msg){
-    document.querySelector("#loginMsg").innerText = msg;
+    this.loginMsgEl = document.querySelector("#loginMsg");
+    this.loginMsgEl.innerText = msg;
     const newLogin = new Login();
   }
-
 }
